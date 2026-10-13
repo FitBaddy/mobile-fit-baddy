@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  mobile:
+    name: Android (unit-тесты и lint)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Unit-тесты
+        run: ./gradlew testDebugUnitTest --no-daemon
+      - name: Lint
+        run: ./gradlew lintDebug --no-daemon
+      - name: Сборка APK
+        run: ./gradlew assembleDebug --no-daemon
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: android-reports
+          path: |
+            app/build/reports
+            app/build/test-results
+          if-no-files-found: ignore
